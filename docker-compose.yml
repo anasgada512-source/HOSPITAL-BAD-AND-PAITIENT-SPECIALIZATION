@@ -1,0 +1,27 @@
+# Run everything (website + API + MongoDB) with one command:
+#   docker compose up -d --build
+# Then open http://localhost:5000
+services:
+  app:
+    build: .
+    ports:
+      - "5000:5000"
+    environment:
+      NODE_ENV: production
+      PORT: 5000
+      MONGO_URI: mongodb://mongo:27017/hospital_beds
+      # change this before using anywhere public
+      JWT_SECRET: change-me-to-a-long-random-string
+      ADMIN_EMAIL: anasgada512@gmail.com
+    depends_on:
+      - mongo
+    restart: unless-stopped
+
+  mongo:
+    image: mongo:7
+    volumes:
+      - mongo_data:/data/db
+    restart: unless-stopped
+
+volumes:
+  mongo_data:

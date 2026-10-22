@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            server/package-lock.json
+            client/package-lock.json
+
+      - name: Install server dependencies
+        run: npm ci --prefix server
+
+      - name: Syntax check server
+        run: |
+          for f in $(find server/src -name "*.js"); do node --check "$f"; done
+
+      - name: Install and build client
+        run: |
+          npm ci --prefix client
+          npm run build --prefix client
+
+      - name: Build Docker image
+        run: docker build -t carebed:ci .
